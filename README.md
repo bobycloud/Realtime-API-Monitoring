@@ -7,8 +7,9 @@ This project is under development.
   <img src="https://i.imgur.com/lHWP9YC.jpg">
 </p>
 1. End user <br>
-2. On django admin pannel you can enter endpoint api details like uri, headers, body, etc. <br>
+2. On django admin pannel you can enter endpoint api details such as uri, headers, body, etc. <br>
 3. Django dashboard project stores request details to postgresql.
+4. Postgresql stores Endpoint API's and can be used to monitoring.
 
 ## Docker Containers
 First, run Postgresql container on port 5434 and credentails (DB Name, USER, Password) to store API request details. <br>
