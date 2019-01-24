@@ -10,6 +10,7 @@ This project is under development.
 2. On django admin pannel you can enter endpoint api details such as uri, headers, body, etc. <br>
 3. Django dashboard project stores request details to postgresql.
 4. Postgresql stores Endpoint API's and can be used to monitoring.
+5. As a time series database, influxdb will store response logs.
 
 ## Docker Containers
 First, run Postgresql container on port 5434 and credentails (DB Name, USER, Password) to store API request details. <br>
