@@ -1,43 +1,61 @@
-# Realtime-API-Monitoring
+# Kuberpress
+Kuberpress is a sample project of deploying a wordpress two tier web application with mysql on Kubernetes with NFS server as persitent volume, Ingress routing and a Python script to store database node ip logs as init container. 
 
-Realtime monitoring using Python (Django) & Golang as programming languages, Postgresql & Influxdb as databases, Grafana and Docker. 
-This project is under development.
+## Step 1 - Run NFS server and client
+Install nfs-kernel-server on `NFS server` - Ubuntu 18.0.4
+```
+sudo apt-get update
+sudo apt-get install nfs-kernel-server
+```
+Install nfs-common on `NFS client` - Ubuntu 18.0.4
+```
+sudo apt-get update
+sudo apt-get install nfs-common
+```
+Create mount directory on `NFS server`.
+```
+sudo mkdir /var/nfs/general -p
+sudo chown nobody:nogroup /var/nfs/general
+```
+Configure NFS exports on the `NFS server`.
+```
+sudo nano /etc/exports
+```
+Assign mount direcoty and client ip address on exports file.
+```
+/var/nfs/general	172.20.10.5(rw,sync,no_subtree_check,no_root_squash)
+```
+Then restart `nfs-kernel-server`.
+```
+sudo systemctl restart nfs-kernel-server
+```
+Create mount point on `NFS client`
+```
+sudo mkdir -p /nfs/general
+```
+Then mount directory on `NFS client`
+```
+sudo mount 172.20.10.3:/var/nfs/general /nfs/general
+```
+Now `NFS server` and `NFS client` configured completely.
 
-<p align="center">
-  <img src="https://i.imgur.com/lHWP9YC.jpg">
-</p>
-1. End user <br>
-2. On django admin pannel you can enter endpoint api details such as uri, headers, body, etc. <br>
-3. Django dashboard project stores request details to postgresql. <br>
-4. Postgresql stores Endpoint API's and can be used to monitoring. <br>
-5. As a time series database, influxdb will store response logs. <br>
+## Step 2 - Create Kubernetes cluster 
+Run kubernetes cluster using `kubeadm-dind-cluster` preconfigured scripts for Kubernetes version 1.10 through 1.13 published as GitHub releases.
+```
+$ wget https://github.com/kubernetes-sigs/kubeadm-dind-cluster/releases/download/v0.1.0/dind-cluster-v1.13.sh
+$ chmod +x dind-cluster-v1.13.sh
 
-## Docker Containers
-First, run Postgresql container on port 5434 and credentails (DB Name, USER, Password) to store API request details. <br>
-    
-```bash
-docker run --name postgresql -d \
-    -p 5434:5432 \
-    --env 'DB_NAME=YOUR_POSTGRES_NAME' \
-    --env 'DB_USER=YOUR_POSTGRES_USER' --env 'DB_PASS=YOUR_POSTGRES_PASSWORD' \
-    --env 'DB_EXTENSION=pg_trgm' \
-    --volume /srv/docker/postgres/api:/var/lib/postgresql_api \
-    postgres:latest
-```
-Then, run `InfluxDB` container to store golang api core request results.
-```
-docker run --name influxdb -d \
-    -p 8086:8086 -p 8083:8083 \
-    -v /srv/docker/influxdb:/var/lib/influxdb \
-    -e INFLUXDB_ADMIN_ENABLED=true \
-    influxdb
-```
-Run grafana to see Restfull API chart logs. 
-```
-docker run --name grafana -d \
-  -p 3000:3000 \
-  -e "GF_SERVER_ROOT_URL=http://127.0.0.1" \
-  -e "GF_SECURITY_ADMIN_PASSWORD=GRAFANA_ADMIN_PASSWORD" \
-  grafana/grafana
+$ # start the cluster
+$ ./dind-cluster-v1.13.sh up
 
+$ # add kubectl directory to PATH
+$ export PATH="$HOME/.kubeadm-dind-cluster:$PATH"
+
+$ kubectl get nodes
+NAME          STATUS    ROLES     AGE       VERSION
+kube-master   Ready     master    4m        v1.13.0
+kube-node-1   Ready     <none>    2m        v1.13.0
+kube-node-2   Ready     <none>    2m        v1.13.0
 ```
+
+## Step 3 - Create secrets for MySQL
