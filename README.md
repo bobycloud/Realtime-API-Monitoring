@@ -11,6 +11,8 @@ This project is under development.
 3. Django dashboard project stores request details to postgresql. <br>
 4. Postgresql stores Endpoint API's and can be used to monitoring. <br>
 5. As a time series database, influxdb will store response logs. <br>
+6. Tiny gopher collects API details and store it into influxDB.
+7. Grafana connects to InfluxDB as a time series database and show metrics on the dashboard.
 
 ## Docker Containers
 First, run Postgresql container on port 5434 and credentails (DB Name, USER, Password) to store API request details. <br>
